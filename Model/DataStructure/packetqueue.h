@@ -26,6 +26,7 @@ typedef struct PacketQueue
 void packet_queue_init(PacketQueue *queue);
 int packet_queue_put(PacketQueue *queue, AVPacket *packet);
 int packet_queue_get(PacketQueue *queue, AVPacket *pakcet, int block);
+void packet_queue_flush(PacketQueue *queue);
 
 #ifdef __cplusplus
 }

@@ -81,3 +81,20 @@ int packet_queue_get(PacketQueue *queue, AVPacket *pkt, int block)
     SDL_UnlockMutex(queue->mutex);
     return ret;
 }
+
+void packet_queue_flush(PacketQueue *queue)
+{
+    AVPacketList *pkt, *pkt1;
+    SDL_LockMutex(queue->mutex);
+    for(pkt = queue->first_pkt; pkt != NULL; pkt = pkt1)
+    {
+    pkt1 = pkt->next;
+    av_free_packet(&pkt->pkt);
+    av_freep(&pkt);
+    }
+    queue->last_pkt = NULL;
+    queue->first_pkt = NULL;
+    queue->nb_packets = 0;
+    queue->size = 0;
+    SDL_UnlockMutex(queue->mutex);
+}

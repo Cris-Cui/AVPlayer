@@ -9,7 +9,8 @@ VideoDialog::VideoDialog(QWidget *parent)
 {
     ui->setupUi(this);
     m_player = new AVPlayer;
-    m_player->setFileName(FILE_NAME);
+    QString file_name = FILE_NAME;
+    m_player->set_fileName(file_name);
     connect(m_player, SIGNAL(SIG_getOneImage(QImage)), this, SLOT(slot_refreshImage(QImage)));
 }
 
@@ -30,9 +31,40 @@ void VideoDialog::slot_refreshImage(QImage image)
     ui->label->setPixmap(QPixmap::fromImage(image));
 }
 
+void VideoDialog::SlotPlayerStateChanged(int state)
+{
+    switch (state) {
+        case kStop:
+            cout << "AVPlayer::Stop";
+            is_stop = true;
+        break;
+        case kPlaying:
+            cout << "AVPlayer::Playing";
+            is_stop = false;
+        break;
+    }
+}
 
-void VideoDialog::on_pushButton_clicked()
+void VideoDialog::on_pb_start_clicked()
 {
     m_player->start();
+}
+
+
+void VideoDialog::on_pb_resume_clicked()
+{
+    m_player->Play();
+}
+
+
+void VideoDialog::on_pb_pause_clicked()
+{
+    m_player->Pause();
+}
+
+
+void VideoDialog::on_pb_stop_clicked()
+{
+    m_player->Stop(true);
 }
 
