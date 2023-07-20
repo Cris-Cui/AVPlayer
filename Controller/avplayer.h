@@ -46,7 +46,7 @@ struct AVState {
     bool is_quit                    = false; // 停止标志
     bool is_read_frame_finished     = false; // run线程读音视频流上下文是否读取完毕
     bool is_run_finished            = true; // run读取线程是否结束
-    bool is_video_thread_finished   = false; // 视频线程是否结束
+    bool is_video_thread_finished   = true; // 视频线程是否结束
     int seek_req; //跳转标志 -- 读线程
     int64_t seek_pos; //跳转的位置 -- 微秒
     int seek_flag_audio;//跳转标志 -- 用于音频线程中
@@ -82,12 +82,17 @@ signals:
      * @param state
      */
     void SIG_PlayerStateChanged(int state);
+    /**
+     * @brief SIG_TotalTime 发送音视频总时长(微秒)信号
+     * @param usec
+     */
+    void SIG_TotalTime(qint64 usec);
 public:
     /**
      * @brief setFileName filename的setter方法
      * @param newFileName 文件名
      */
-    void set_fileName(const QString &filename);
+    void set_filename(const QString &filename);
 
 private:
     /**
@@ -150,6 +155,16 @@ public:
      * @return
      */
     static double SynchronizeVideo(AVState* is, AVFrame* src_frame, double pts);
+    /**
+     * @brief GetCurrentTime 获取当前时钟(微秒)
+     * @return 返回音频时钟
+     */
+    double GetCurrentTime();
+    /**
+     * @brief GetTotalTime 获取总时间(微秒)
+     * @return 音视频上下文存在返回duration属性；否则返回-1
+     */
+    int64_t GetTotalTime();
 private:
     /// @brief 文件名
     QString filename_;

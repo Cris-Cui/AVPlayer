@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/color.png</file>
+        <file>images/open_focus.png</file>
+        <file>images/open_normal.png</file>
+        <file>images/pause_black.png</file>
+        <file>images/pause_white.png</file>
+        <file>images/start_black.png</file>
+        <file>images/start_white.png</file>
+        <file>images/stop_black.png</file>
+        <file>images/stop_white.png</file>
+        <file>images/voice_black.png</file>
+        <file>images/voice_white.png</file>
+    </qresource>
+</RCC>

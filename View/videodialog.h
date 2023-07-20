@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <QImage>
 #include <QPixmap>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 #include "Controller/avplayer.h"
 
 QT_BEGIN_NAMESPACE
@@ -23,10 +26,6 @@ private slots:
 
     void SlotPlayerStateChanged(int state);
     /**
-     * @brief on_pb_start_clicked 开始按钮点击函数
-     */
-    void on_pb_start_clicked();
-    /**
      * @brief on_pb_resume_clicked 恢复播放按钮点击函数
      */
     void on_pb_resume_clicked();
@@ -37,9 +36,11 @@ private slots:
 
     void on_pb_stop_clicked();
 
+    void on_pb_openfile_clicked();
+
 private:
     Ui::VideoDialog *ui;
     AVPlayer* m_player;
-    bool is_stop;
+    bool is_stop = false;
 };
 #endif // VIDEODIALOG_H

@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
-     <width>731</width>
-     <height>461</height>
+     <y>10</y>
+     <width>761</width>
+     <height>481</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -32,59 +32,209 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="pb_start">
+  <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
+     <x>20</x>
+     <y>500</y>
+     <width>761</width>
+     <height>41</height>
     </rect>
    </property>
-   <property name="text">
-    <string>开始</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="lb_current_time">
+      <property name="text">
+       <string>00:00:00</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSlider" name="slider_process">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lb_total_time">
+      <property name="text">
+       <string>00:00:00</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QPushButton" name="pb_resume">
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
+     <x>20</x>
+     <y>550</y>
+     <width>761</width>
+     <height>46</height>
     </rect>
    </property>
-   <property name="text">
-    <string>恢复播放</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pb_pause">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>暂停</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pb_stop">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>560</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>停止</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QPushButton" name="pb_openfile">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/images/open_normal.png</normaloff>:/images/open_normal.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>35</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+      <property name="autoDefault">
+       <bool>true</bool>
+      </property>
+      <property name="default">
+       <bool>false</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pb_resume">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/images/start_white.png</normaloff>:/images/start_white.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>35</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pb_pause">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/images/pause_white.png</normaloff>:/images/pause_white.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>35</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pb_stop">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/images/stop_white.png</normaloff>:/images/stop_white.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>35</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QLabel" name="lb_video_filename">
+      <property name="minimumSize">
+       <size>
+        <width>141</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pb_volumn">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/images/voice_white.png</normaloff>:/images/voice_white.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>35</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSlider" name="slider_volume">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

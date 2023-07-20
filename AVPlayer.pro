@@ -34,4 +34,7 @@ LIBS += \
     $$PWD/ThirdParty/ffmpeg-3.4/lib/swscale.lib\
     $$PWD/ThirdParty/SDL2-2.0.10/lib/x86/SDL2.lib
 
+RESOURCES += \
+    res.qrc
+
 

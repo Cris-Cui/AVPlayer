@@ -1,2 +1,5 @@
-# Personal file
+# Personal File
 *.pro.user
+
+# Compiler File
+*.autosave

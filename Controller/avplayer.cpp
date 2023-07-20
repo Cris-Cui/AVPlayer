@@ -14,12 +14,12 @@ AVPlayer::AVPlayer(QObject *parent) : QThread(parent)
     cout << avcodec_configuration();
 }
 
-void AVPlayer::set_fileName(const QString &filename)
+void AVPlayer::set_filename(const QString &filename)
 {
-    // if (player_state_ != kStop) return;
+    if (player_state_ != kStop) return;
     filename_ = filename;
-    // player_state_ = kPlaying;
-    // this->start();
+    player_state_ = kPlaying;
+    this->start();
 }
 
 /**
@@ -30,6 +30,7 @@ void AVPlayer::set_fileName(const QString &filename)
 void AVPlayer::run()
 {
     // player_state_ = kPlaying;
+    av_state_->is_read_frame_finished = false;
     av_state_->is_run_finished = false;
     av_state_->is_quit = false;
     av_state_->video_clock = 0;
@@ -134,6 +135,7 @@ void AVPlayer::run()
     AVPacket* packet = (AVPacket*)malloc(sizeof(AVPacket)); // 解码前的压缩数据(视频对应H.264等码流数据，音频对应AAC/MP3等码流数据)
     player_state_ = kPlaying;
     int delay_count = 0;
+    Q_EMIT SIG_TotalTime(GetTotalTime());   // 给UI线程发送当前视频的总时长
     while(true) {
         if (av_state_->is_quit) {
             break;
@@ -272,6 +274,7 @@ void AVPlayer::AudioCallBack(void *userdata, Uint8 *stream, int len) {
 
 int AVPlayer::VideoDecodeThread(void *arg) {
     AVState *is = (AVState*)arg;
+    is->is_video_thread_finished = false;
     AVPacket pkt1, *packet = &pkt1;
     int ret, got_picture, numBytes;
     double video_pts = 0; //当前视频的 pts
@@ -516,5 +519,16 @@ double AVPlayer::SynchronizeVideo(AVState *is, AVFrame *src_frame, double pts)
     frame_delay += src_frame->repeat_pict * (frame_delay * 0.5);
     is->video_clock += frame_delay;
     return pts;
+}
+
+double AVPlayer::GetCurrentTime()
+{
+    return av_state_->audio_clock;
+}
+
+int64_t AVPlayer::GetTotalTime()
+{
+    if (av_state_->av_fmt_ctx) return av_state_->av_fmt_ctx->duration;
+    else return -1;
 }
 

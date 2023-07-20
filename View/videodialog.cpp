@@ -4,13 +4,11 @@
 #include "Util/AppConfig.h"
 
 VideoDialog::VideoDialog(QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::VideoDialog)
-{
+    : QDialog(parent), ui(new Ui::VideoDialog) {
     ui->setupUi(this);
     m_player = new AVPlayer;
-    QString file_name = FILE_NAME;
-    m_player->set_fileName(file_name);
+    // QString file_name = FILE_NAME;
+    // m_player->set_filename(file_name);
     connect(m_player, SIGNAL(SIG_getOneImage(QImage)), this, SLOT(slot_refreshImage(QImage)));
 }
 
@@ -45,15 +43,10 @@ void VideoDialog::SlotPlayerStateChanged(int state)
     }
 }
 
-void VideoDialog::on_pb_start_clicked()
-{
-    m_player->start();
-}
-
-
 void VideoDialog::on_pb_resume_clicked()
 {
-    m_player->Play();
+    if (is_stop) m_player->start();
+    else m_player->Play();
 }
 
 
@@ -66,5 +59,27 @@ void VideoDialog::on_pb_pause_clicked()
 void VideoDialog::on_pb_stop_clicked()
 {
     m_player->Stop(true);
+}
+
+
+void VideoDialog::on_pb_openfile_clicked()
+{
+    m_player->Stop( true );
+    //打开文件 弹出对话框 参数:父窗口, 标题, 默认路径, 筛选器
+    QString path = QFileDialog::getOpenFileName(this,"选择要播放的文件" , "C:/Users/28568/Desktop/",
+                                                "视频文件 (*.flv *.rmvb *.avi *.mp4 *.mkv);; 所有文件(*.*);;");
+    if(!path.isEmpty()) {
+        cout << path;
+        QFileInfo info(path);
+        if(info.exists()) {
+            m_player->Stop( true ); //如果播放 你要先关闭
+
+            m_player->set_filename(path);
+            ui->lb_video_filename->setText(info.baseName());
+            // slot_PlayerStateChanged(PlayerState::Playing);
+        } else {
+            QMessageBox::information( this, "提示" , "打开文件失败");
+        }
+    }
 }
 
