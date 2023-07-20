@@ -53,6 +53,11 @@ public slots:
      * @brief SlotTimerTimeOut 定时器超时响应
      */
     void SlotTimerTimeOut();
+    /**
+     * @brief SlotVideoSliderValueChanged 播放进度条跳转
+     * @param value 跳转到的秒数
+     */
+    void SlotVideoSliderValueChanged(int value);
 private:
     Ui::VideoDialog *ui;
     /// 音视频处理播放者

@@ -8,14 +8,14 @@ VideoDialog::VideoDialog(QWidget *parent)
     ui->setupUi(this);
     timer_ = new QTimer;
     connect(timer_, SIGNAL(timeout()), this, SLOT(SlotTimerTimeOut()));
-    timer_->setInterval(500);
+    timer_->setInterval(500);   // 每隔500毫秒定时器超时
 
     player_ = new AVPlayer;
     connect(player_, SIGNAL(SIG_getOneImage(QImage)), this, SLOT(slot_refreshImage(QImage)));
     connect(player_, SIGNAL(SIG_TotalTime(qint64)), this, SLOT(SlotGetTotalTime(qint64)));
-
+    connect( ui->slider_process, SIGNAL(SIG_valueChanged(int)), this, SLOT(SlotVideoSliderValueChanged(int)));
     if (!timer_->isActive()) {
-        timer_->start();
+        timer_->start();    // 启动定时器
     }
 }
 
@@ -51,7 +51,6 @@ void VideoDialog::SlotPlayerStateChanged(int state)
 }
 
 void VideoDialog::SlotTimerTimeOut() {
-    cout << __func__;
     if (QObject::sender() == timer_) {
         qint64 sec = player_->GetCurrentTime() / 1000000;
         ui->slider_process->setValue(sec);
@@ -65,6 +64,13 @@ void VideoDialog::SlotTimerTimeOut() {
         } else if(ui->slider_process->value() + 1 == ui->slider_process->maximum() && player_->player_state_ == kStop) {
             SlotPlayerStateChanged(kStop);
         }
+    }
+}
+
+void VideoDialog::SlotVideoSliderValueChanged(int value)
+{
+    if( QObject::sender() == ui->slider_process) {
+        player_->Seek((qint64)value*1000000); //value 秒
     }
 }
 

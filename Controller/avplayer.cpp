@@ -153,6 +153,49 @@ void AVPlayer::run()
             SDL_Delay(10);
             continue;
         }
+        if( av_state_->is_seek ) {
+            // 跳转标志位 is_seek --> 1 清除队列里的缓存 3s --> 3min 3s 里面的数据 存在 队列和解码器
+            // 3s 在解码器里面的数据和 3min 的会合在一起 引起花屏 --> 解决方案 清理解码器缓存AV_flush_...
+            //什么时候清理 -->要告诉它 , 所以要来标志包 FLUSH_DATA "FLUSH"
+            //关键帧--比如 10 秒 --> 15 秒 跳转关键帧 只能是 10 或 15 , 如果你要跳到 13 , 做法是跳到10 然后 10-13 的包全扔掉
+
+            int stream_index = -1;
+            int64_t seek_target = av_state_->seek_pos;//微秒
+            if (av_state_->video_stream_index >= 0)
+                stream_index = av_state_->video_stream_index;
+            else if (av_state_->audio_stream_index >= 0)
+                stream_index = av_state_->audio_stream_index;
+            AVRational aVRational = {1, AV_TIME_BASE};
+            if (stream_index >= 0) {
+                seek_target = av_rescale_q(seek_target, aVRational,
+                                           av_state_->av_fmt_ctx->streams[stream_index]->time_base); //跳转到的位置
+            }
+            if (av_seek_frame(av_state_->av_fmt_ctx, stream_index, seek_target,
+                              AVSEEK_FLAG_BACKWARD) < 0) {
+                fprintf(stderr, "%s: error while seeking\n",av_state_->av_fmt_ctx->filename);
+            } else {
+                if (av_state_->audio_stream_index >= 0) {
+                    AVPacket *packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个 packet
+                    av_new_packet(packet, 10);
+                    strcpy((char*)packet->data,FLUSH_DATA);
+                    packet_queue_flush(av_state_->audio_que); //清除队列
+                    // packet_queue_put(av_state_->audio_que, packet); //往队列中存入用来清除的包
+                }
+                if (av_state_->video_stream_index >= 0) {
+                    AVPacket *packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个 packet
+                    av_new_packet(packet, 10);
+                    strcpy((char*)packet->data,FLUSH_DATA);
+                    packet_queue_flush(av_state_->video_que); //清除队列
+                    // packet_queue_put(av_state_->video_que, packet); //往队列中存入用来清除的包
+                    av_state_->video_clock = 0; //考虑到向左快退 避免卡死
+                    //视频解码过快会等音频 循环 SDL_Delay 在循环过程中 音频时钟会改变 , 快退 音频时钟变小
+                }
+            }
+            av_state_->is_seek = false;
+            av_state_->seek_time = av_state_->seek_pos ; //精确到微妙 seek_time 是用来做视频音频的时钟调整 --关键帧
+            av_state_->seek_flag_audio = 1; //在视频音频循环中 , 判断, AVPacket 是 FLUSH_DATA清空解码器缓存
+            av_state_->seek_flag_video = 1;
+        }
         /**
          * 函数原型: int av_read_frame(AVFormatContext *s, AVPacket *pkt);
          * 函数作用: 从输入媒体文件中读取下一个数据包（packet）。
@@ -311,6 +354,13 @@ int AVPlayer::VideoDecodeThread(void *arg) {
                 continue;
             }
         }
+        /// @todo 理解
+        if (strcmp((char*)packet->data, FLUSH_DATA) == 0) {
+            avcodec_flush_buffers(is->video_stream->codec);
+            av_free_packet(packet);
+            is->video_clock = 0;
+            continue;
+        }
         while(1) {
             if (is->is_quit) {
                 break;
@@ -331,6 +381,16 @@ int AVPlayer::VideoDecodeThread(void *arg) {
         }
         video_pts *= 1000000 *av_q2d(is->video_stream->time_base);
         video_pts = SynchronizeVideo(is, pFrame, video_pts);//视频时钟补偿
+
+        if (is->seek_flag_video) {  // 跳转到关键帧
+            //发生了跳转 则跳过关键帧到目的时间的这几帧
+            if (video_pts < is->seek_time) {
+                av_free_packet(packet);
+                continue;
+            }else {
+                is->seek_flag_video = 0;
+            }
+        }
         if (got_picture) {
             sws_scale(img_convert_ctx,
                       (uint8_t const * const *) pFrame->data,
@@ -389,6 +449,12 @@ int AVPlayer::audio_decode_frame(AVState *is, uint8_t *audio_buf, int buf_size) 
             }
             return -1;
         }
+        /// @todo
+        if(strcmp((char*)pkt.data, FLUSH_DATA) == 0) {
+            avcodec_flush_buffers(is->audio_stream->codec);
+            av_free_packet(&pkt);
+            continue;
+        }
         audio_pkt_data = pkt.data;
         audio_pkt_size = pkt.size;
         while(audio_pkt_size > 0)
@@ -427,8 +493,21 @@ int AVPlayer::audio_decode_frame(AVState *is, uint8_t *audio_buf, int buf_size) 
             //时钟每次要加一帧数据的时间= 一帧数据的大小/一秒钟采样 sample_rate 多次对应的字节数.
             is->audio_clock += (double)sampleSize*1000000 / (double) (n* is->audio_dec_ctx->sample_rate);
             // x s / f = ( bytes / f ) / (bytes / s ) ; 时钟是微秒级别 * 1000000
-            if( got_picture )
-            {
+            if( is->seek_flag_audio) {
+                if( is ->audio_clock < is->seek_time) { //没有到目的时间
+                    if( pkt.pts != AV_NOPTS_VALUE) {
+                        is->audio_clock = av_q2d( is->audio_stream->time_base )*pkt.pts *1000000 ; //取音频时钟 可能精度不够
+                    }
+                    break;
+                }
+                else {
+                    if( pkt.pts != AV_NOPTS_VALUE) {
+                        is->audio_clock = av_q2d( is->audio_stream->time_base )*pkt.pts *1000000 ; //取音频时钟 可能精度不够
+                    }
+                    is->seek_flag_audio = 0 ;
+                }
+            }
+            if( got_picture ) {
                 swr_ctx = swr_alloc_set_opts(NULL, wanted_frame.channel_layout,
                                              (AVSampleFormat)wanted_frame.format,
                                              wanted_frame.sample_rate,
@@ -501,6 +580,14 @@ void AVPlayer::Stop(bool is_wait)
     }
     player_state_ = kStop;
     // Q_EMIT SIG_PlayerStateChanged(kStop);
+}
+
+void AVPlayer::Seek(int64_t pos)
+{
+    if(!av_state_->is_seek) {
+        av_state_->seek_pos = pos;
+        av_state_->is_seek  = true;
+    }
 }
 
 double AVPlayer::SynchronizeVideo(AVState *is, AVFrame *src_frame, double pts)

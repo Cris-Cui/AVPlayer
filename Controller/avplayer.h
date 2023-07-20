@@ -19,7 +19,7 @@ extern "C" {
 
 class AVPlayer;
 
-struct AVState {
+struct AVState { // 281KB
     AVFormatContext *av_fmt_ctx     = nullptr;  // 文件音视频流上下文
     /////////////////////////VIDEO//////////////////////////////
     int video_stream_index          = -1;       // 解码器需要的视频流索引
@@ -42,16 +42,16 @@ struct AVState {
     unsigned int audio_buf_size = 0;
     unsigned int audio_buf_index = 0;
     /////////////////////////播放控制////////////////////////////
-    bool is_pause                   = false; // 暂停标志
-    bool is_quit                    = false; // 停止标志
-    bool is_read_frame_finished     = false; // run线程读音视频流上下文是否读取完毕
-    bool is_run_finished            = true; // run读取线程是否结束
-    bool is_video_thread_finished   = true; // 视频线程是否结束
-    int seek_req; //跳转标志 -- 读线程
-    int64_t seek_pos; //跳转的位置 -- 微秒
-    int seek_flag_audio;//跳转标志 -- 用于音频线程中
-    int seek_flag_video;//跳转标志 -- 用于视频线程中
-    double seek_time; //跳转的时间(秒) 值和 seek_pos 是一样的
+    bool is_pause                   = false;    // 暂停标志
+    bool is_quit                    = false;    // 停止标志
+    bool is_read_frame_finished     = false;    // run线程读音视频流上下文是否读取完毕
+    bool is_run_finished            = true;     // run读取线程是否结束
+    bool is_video_thread_finished   = true;     // 视频线程是否结束
+    bool is_seek;       // 跳转标志 -- 读线程
+    int64_t seek_pos;   // 跳转的位置 -- 微秒
+    int seek_flag_audio;// 跳转标志 -- 用于音频线程中
+    int seek_flag_video;// 跳转标志 -- 用于视频线程中
+    double seek_time;   // 跳转的时间(秒) 值和 seek_pos 是一样的
     int64_t start_time              = 0;        // 单位:微秒
     ////////////////////////////////////////////////////////////
     AVPlayer* player                = nullptr;
@@ -146,6 +146,11 @@ public:
      * @brief Stop 播放控制-视频停止
      */
     void Stop(bool is_wait);
+    /**
+     * @brief Seek 播放控制-跳转
+     * @param pos 要跳转的位置
+     */
+    void Seek(int64_t pos);
 public:
     /**
      * @brief SynchronizeVideo 时间补偿函数--视频延时

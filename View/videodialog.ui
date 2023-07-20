@@ -50,7 +50,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QSlider" name="slider_process">
+     <widget class="VideoSlider" name="slider_process">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -233,6 +233,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VideoSlider</class>
+   <extends>QSlider</extends>
+   <header location="global">videoslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../res.qrc"/>
  </resources>

@@ -21,7 +21,8 @@ include($$PWD/Util/Util.pri)
 
 INCLUDEPATH += \
     $$PWD/ThirdParty/ffmpeg-3.4/include\
-    $$PWD/ThirdParty/SDL2-2.0.10/include
+    $$PWD/ThirdParty/SDL2-2.0.10/include\
+    $$PWD/View/
 
 LIBS += \
     $$PWD/ThirdParty/ffmpeg-3.4/lib/avcodec.lib\

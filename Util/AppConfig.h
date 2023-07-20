@@ -13,4 +13,6 @@
 #define MAX_AUDIO_SIZE (1024*16*25*10)  //音频阈值
 #define MAX_VIDEO_SIZE (1024*255*25*2)  //视频阈值
 
+#define FLUSH_DATA ("FLUSH")
+
 #endif // APPCONFIG_H
