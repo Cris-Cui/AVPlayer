@@ -170,8 +170,7 @@ void AVPlayer::run()
                 seek_target = av_rescale_q(seek_target, aVRational,
                                            av_state_->av_fmt_ctx->streams[stream_index]->time_base); //跳转到的位置
             }
-            if (av_seek_frame(av_state_->av_fmt_ctx, stream_index, seek_target,
-                              AVSEEK_FLAG_BACKWARD) < 0) {
+            if (av_seek_frame(av_state_->av_fmt_ctx, stream_index, seek_target, AVSEEK_FLAG_BACKWARD) < 0) {
                 fprintf(stderr, "%s: error while seeking\n",av_state_->av_fmt_ctx->filename);
             } else {
                 if (av_state_->audio_stream_index >= 0) {
@@ -179,14 +178,14 @@ void AVPlayer::run()
                     av_new_packet(packet, 10);
                     strcpy((char*)packet->data,FLUSH_DATA);
                     packet_queue_flush(av_state_->audio_que); //清除队列
-                    // packet_queue_put(av_state_->audio_que, packet); //往队列中存入用来清除的包
+                    packet_queue_put(av_state_->audio_que, packet); //往队列中存入用来清除的包
                 }
                 if (av_state_->video_stream_index >= 0) {
                     AVPacket *packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个 packet
                     av_new_packet(packet, 10);
                     strcpy((char*)packet->data,FLUSH_DATA);
                     packet_queue_flush(av_state_->video_que); //清除队列
-                    // packet_queue_put(av_state_->video_que, packet); //往队列中存入用来清除的包
+                    packet_queue_put(av_state_->video_que, packet); //往队列中存入用来清除的包
                     av_state_->video_clock = 0; //考虑到向左快退 避免卡死
                     //视频解码过快会等音频 循环 SDL_Delay 在循环过程中 音频时钟会改变 , 快退 音频时钟变小
                 }
