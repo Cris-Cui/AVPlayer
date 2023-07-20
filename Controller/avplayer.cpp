@@ -33,6 +33,7 @@ void AVPlayer::run()
     av_state_->is_run_finished = false;
     av_state_->is_quit = false;
     av_state_->video_clock = 0;
+    av_state_->audio_clock = 0;
     av_state_->is_video_thread_finished = false;
     /// @todo 2. 打开音视频文件，并获取音视频流索引
     if (avformat_open_input(&av_state_->av_fmt_ctx, filename_.toStdString().c_str(), NULL, NULL) != 0) {
