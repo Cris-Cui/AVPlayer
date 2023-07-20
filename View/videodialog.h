@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QTimer>
 #include "Controller/avplayer.h"
 
 QT_BEGIN_NAMESPACE
@@ -33,14 +34,31 @@ private slots:
      * @brief on_pb_pause_clicked 暂停按钮点击函数
      */
     void on_pb_pause_clicked();
-
+    /**
+     * @brief on_pb_stop_clicked 停止按钮点击函数
+     */
     void on_pb_stop_clicked();
-
+    /**
+     * @brief on_pb_openfile_clicked 打开视频文件按钮点击函数
+     */
     void on_pb_openfile_clicked();
 
+public slots:
+    /**
+     * @brief SlotGetTotalTime 获取视频全部时间
+     * @param usec 时间, 单位微秒
+     */
+    void SlotGetTotalTime(qint64 usec);
+    /**
+     * @brief SlotTimerTimeOut 定时器超时响应
+     */
+    void SlotTimerTimeOut();
 private:
     Ui::VideoDialog *ui;
-    AVPlayer* m_player;
+    /// 音视频处理播放者
+    AVPlayer* player_;
     bool is_stop = false;
+    /// 定时器
+    QTimer* timer_;
 };
 #endif // VIDEODIALOG_H

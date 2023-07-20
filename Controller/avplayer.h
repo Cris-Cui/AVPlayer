@@ -165,7 +165,7 @@ public:
      * @return 音视频上下文存在返回duration属性；否则返回-1
      */
     int64_t GetTotalTime();
-private:
+public:
     /// @brief 文件名
     QString filename_;
     /// @brief 解码音频视频所有相关信息
