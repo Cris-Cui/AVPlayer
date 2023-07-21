@@ -13,10 +13,10 @@ VideoDialog::VideoDialog(QWidget *parent)
     player_ = new AVPlayer;
     connect(player_, SIGNAL(SIG_getOneImage(QImage)), this, SLOT(slot_refreshImage(QImage)));
     connect(player_, SIGNAL(SIG_TotalTime(qint64)), this, SLOT(SlotGetTotalTime(qint64)));
+    connect(player_, SIGNAL(SIG_PlayerStateChanged(int)), this, SLOT(SlotPlayerStateChanged(int)));
     connect( ui->slider_process, SIGNAL(SIG_valueChanged(int)), this, SLOT(SlotVideoSliderValueChanged(int)));
-    if (!timer_->isActive()) {
-        timer_->start();    // 启动定时器
-    }
+
+    SlotPlayerStateChanged(kStop);
 }
 
 VideoDialog::~VideoDialog()
@@ -41,10 +41,19 @@ void VideoDialog::SlotPlayerStateChanged(int state)
     switch (state) {
         case kStop:
             cout << "AVPlayer::Stop";
+            timer_->stop();
+            // 恢复UI信息
+            ui->slider_process->setValue(0);
+            ui->lb_total_time->setText("00:00:00");
+            ui->lb_current_time->setText("00:00:00");
+            ui->lb_video_filename->setText("0");
+            this->update();
             is_stop = true;
         break;
         case kPlaying:
             cout << "AVPlayer::Playing";
+            timer_->start();
+            this->update();
             is_stop = false;
         break;
     }
@@ -70,6 +79,7 @@ void VideoDialog::SlotTimerTimeOut() {
 void VideoDialog::SlotVideoSliderValueChanged(int value)
 {
     if( QObject::sender() == ui->slider_process) {
+        cout << "changed value:" << value;
         player_->Seek((qint64)value*1000000); //value 秒
     }
 }
@@ -107,7 +117,7 @@ void VideoDialog::on_pb_openfile_clicked()
 
             player_->set_filename(path);
             ui->lb_video_filename->setText(info.baseName());
-            // slot_PlayerStateChanged(PlayerState::Playing);
+            SlotPlayerStateChanged(kPlaying);
         } else {
             QMessageBox::information( this, "提示" , "打开文件失败");
         }

@@ -24,8 +24,6 @@ public:
 
 private slots:
     void slot_refreshImage(QImage);
-
-    void SlotPlayerStateChanged(int state);
     /**
      * @brief on_pb_resume_clicked 恢复播放按钮点击函数
      */
@@ -58,6 +56,11 @@ public slots:
      * @param value 跳转到的秒数
      */
     void SlotVideoSliderValueChanged(int value);
+    /**
+     * @brief SlotPlayerStateChanged 播放状态切换槽函数
+     * @param state 状态
+     */
+    void SlotPlayerStateChanged(int state);
 private:
     Ui::VideoDialog *ui;
     /// 音视频处理播放者

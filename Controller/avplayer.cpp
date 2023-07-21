@@ -29,7 +29,7 @@ void AVPlayer::set_filename(const QString &filename)
  */
 void AVPlayer::run()
 {
-    // player_state_ = kPlaying;
+    player_state_ = kPlaying;
     av_state_->is_read_frame_finished = false;
     av_state_->is_run_finished = false;
     av_state_->is_quit = false;
@@ -210,7 +210,9 @@ void AVPlayer::run()
             delay_count ++;
             if (delay_count >= 300) {
                 av_state_->is_read_frame_finished = true;
+                cout << "debug: read_frame_finished";
                 delay_count = 0;
+                // break;
             }
             if (av_state_->is_quit) {
                 break;
@@ -229,6 +231,7 @@ void AVPlayer::run()
     }
 
     while(!av_state_->is_quit) { // 当退出循环时, 等待音频和视频解码结束
+        cout << "debug: 等待音频线程和视频线程结束";
         SDL_Delay(100);
     }
 
@@ -257,6 +260,8 @@ void AVPlayer::run()
         SDL_UnlockAudio();
         av_state_->audioID = 0;
     }
+    cout << "debug: 视频播放结束";
+    Stop(true);
 }
 
 //len 的值常为 2048,表示一次发送多少。
@@ -339,14 +344,17 @@ int AVPlayer::VideoDecodeThread(void *arg) {
                    pCodecCtx->width, pCodecCtx->height);
     while(1) {
         if (is->is_quit) {
+            cout << "debug: 音频队列播放完毕视频解码quit";
             break;
         }
         if (is->is_pause) {  // 播放暂停探测
             SDL_Delay(10);
             continue;
         }
-        if (packet_queue_get(is->video_que, packet, 1) <= 0) {
+        /// @todo 1 -> 0
+        if (packet_queue_get(is->video_que, packet, 0) <= 0) {
             if (is->is_read_frame_finished && is->audio_que->nb_packets == 0) { // run线程结束或者播放到结束
+                cout << "视频队列没有数据读取完毕了";
                 break;//队列里面没有数据了读取完毕了
             } else {
                 SDL_Delay(1); //只是队列里面暂时没有数据而已
@@ -362,6 +370,7 @@ int AVPlayer::VideoDecodeThread(void *arg) {
         }
         while(1) {
             if (is->is_quit) {
+                cout << "debug: 音频队列播放完毕视频解码quit";
                 break;
             }
             if (is->audio_que->size == 0) break;
@@ -445,6 +454,7 @@ int AVPlayer::audio_decode_frame(AVState *is, uint8_t *audio_buf, int buf_size) 
         if(packet_queue_get(audioq, &pkt, 0) <= 0) {
             if( is->is_read_frame_finished && is->audio_que->nb_packets == 0 ) {
                 is->is_quit = true;
+                cout << "音频队列播放完毕";
             }
             return -1;
         }
@@ -578,7 +588,7 @@ void AVPlayer::Stop(bool is_wait)
         }
     }
     player_state_ = kStop;
-    // Q_EMIT SIG_PlayerStateChanged(kStop);
+    Q_EMIT SIG_PlayerStateChanged(kStop);
 }
 
 void AVPlayer::Seek(int64_t pos)
